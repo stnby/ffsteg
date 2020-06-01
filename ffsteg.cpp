@@ -4,9 +4,9 @@
 #include <arpa/inet.h>
 
 typedef struct {
-	char sig[8];
-	uint32_t width;
-	uint32_t height;
+    char sig[8];
+    uint32_t width;
+    uint32_t height;
 } header_t;
 
 typedef struct {
@@ -28,25 +28,25 @@ private:
 public:
     void read_img() {
         if (fread(&header, 1, sizeof(header_t), stdin) != sizeof(header_t)) {
-		    fputs("incomplete header\n", stderr);
-		    exit(1);
-	    }
+            fputs("incomplete header\n", stderr);
+            exit(1);
+        }
         if (memcmp("farbfeld", header.sig, strlen("farbfeld"))) {
-		    fputs("invalid magic\n", stderr);
-		    exit(1);
-	    }
+            fputs("invalid magic\n", stderr);
+            exit(1);
+        }
         header.width = ntohl(header.width);
         header.height = ntohl(header.height);
         img_len = (uint64_t)header.width * header.height;
         pixel = (pixel_t*)malloc(img_len * sizeof(pixel_t));
         if (!pixel) {
-		    fputs("unable to allocate memory.\n", stderr);
-		    exit(1);
-	    }
+            fputs("unable to allocate memory.\n", stderr);
+            exit(1);
+        }
         if (fread(pixel, sizeof(pixel_t), img_len, stdin) != img_len) {
-		    fputs("unexpected EOF\n", stderr);
-		    exit(1);
-	    }
+            fputs("unexpected EOF\n", stderr);
+            exit(1);
+        }
         for (size_t i = 0; i < img_len; i++) {
             pixel[i].r = ntohs(pixel[i].r);
             pixel[i].g = ntohs(pixel[i].g);
@@ -58,19 +58,19 @@ public:
         header.width = htonl(header.width);
         header.height = htonl(header.height);
         if (fwrite(&header, sizeof(header_t), 1, stdout) != 1) {
-	    	fputs("unable to write header\n", stderr);
-	    	exit(1);
-	    }
+            fputs("unable to write header\n", stderr);
+            exit(1);
+        }
         for (size_t i = 0; i < img_len; i++) {
             pixel[i].r = htons(pixel[i].r);
             pixel[i].g = htons(pixel[i].g);
             pixel[i].b = htons(pixel[i].b);
             pixel[i].a = htons(pixel[i].a);
         }
-	    if (fwrite(pixel, sizeof(pixel_t), img_len, stdout) != img_len) {
-	    	fputs("write error\n", stderr);
-	    	exit(1);
-	    }
+        if (fwrite(pixel, sizeof(pixel_t), img_len, stdout) != img_len) {
+            fputs("write error\n", stderr);
+            exit(1);
+        }
     }
     unsigned encode_msg(const char* str) {
         unsigned ret = 0;
@@ -89,7 +89,6 @@ public:
                 pixel_pos = lrand48() % img_len;
             } while (occupied[pixel_pos]);
             occupied[pixel_pos] = 1; // and mark it as occupied.
-
             uint16_t *color = (uint16_t*)&pixel[pixel_pos];
             int channel = lrand48() % 3; // pseudo-randomly choose color channel (skip alpha channel).
             color[channel] = encode_bit(color[channel], bit);
@@ -117,9 +116,9 @@ public:
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
-		fprintf(stderr, "usage:\n\t%1$s enc [bintext]\n\t%1$s dec [binlen]\n", argv[0]);
-		return 1;
-	}
+        fprintf(stderr, "usage:\n\t%1$s enc [bintext]\n\t%1$s dec [binlen]\n", argv[0]);
+        return 1;
+    }
     image img;
     img.read_img(); // read farbfeld image from stdin.
     if (!strcmp(argv[1], "enc")) {
